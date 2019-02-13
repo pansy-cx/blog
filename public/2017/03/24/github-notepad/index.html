@@ -1,0 +1,57 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="X-UA-Compatible" content="IE=edge"><meta name="author" content="Virigl,mrchan3668@gmail.com"><title>Github 笔记 · Virgil Chan</title><meta name="description" content="新手指南
+git 配置下载完 git 之后，需要进行一些 SSH，邮箱用户等配置  
+SSH什么是 SSH？简单点说，SSH是一种网络协议，用于计算机之间的加密登录。而 Github 就是利用你的 SSH 来对你进行身份验证。所以想在 Github 上提交代码，第一步就是添加 ssh key 配置。"><meta name="keywords" content="HTML,CSS,JavaScript,Vue,AngularJS,WebPack,UnderScore,System,Raspberry,Tool,Linux,WordPress,NodeJS,MongoDB,Git,Python"><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport"><meta content="yes" name="apple-mobile-web-app-capable"><meta content="black" name="apple-mobile-web-app-status-bar-style"><meta content="telephone=no" name="format-detection"><meta name="renderer" content="webkit"><link rel="short icon" href="/images/favicon.png" type="image/x-icon"><link rel="stylesheet" href="/css/style.css"><link rel="stylesheet" href="/css/blog_basic.css"><link rel="stylesheet" href="/css/font-awesome.min.css"><link rel="alternate" type="application/atom+xml" title="ATOM 1.0" href="/atom.xml"><link rel="manifest" href="/manifest.json"></head><body><div class="sidebar animated fadeInDown"><div class="logo-title"><div class="title"><img src="/images/favicon.png" style="width:127px;"><h3 title=""><a href="/">Virgil Chan</a></h3><div class="description"><p>间歇性凌云壮志，持续性混吃等死</p></div></div></div><ul class="social-links"><li><a href="http://www.feed43.com/6708067855351261.xml"><i class="fa fa-rss"></i></a></li><li><a href="http://weibo.com/1953548815"><i class="fa fa-weibo"></i></a></li><li><a href="http://github.com/pansy-cx"><i class="fa fa-github"></i></a></li></ul><div class="footer"><a target="_blank" href="/"><span>Theme by </span></a><a href="https://www.caicai.me"> CaiCai </a><span>&</span><a href="https://github.com/Ben02/hexo-theme-Anatole"> Ben</a><div class="by_farbox"><a href="https://hexo.io/zh-cn/" target="_blank">Proudly published with Hexo&#65281;</a></div></div></div><div class="main"><div class="page-top animated fadeInDown"><div class="nav"><li><a href="/">首页</a></li><li><a href="/about">关于</a></li><li><a href="/archives">归档</a></li></div><div class="information"><div class="back_btn"><li><a class="fa fa-chevron-left" onclick="window.history.go(-1)"> </a></li></div><div class="avatar"><img src="/images/favicon.png"></div></div></div><div class="autopagerize_page_element"><div class="content"><div class="post-page"><div class="post animated fadeInDown"><div class="post-title"><h3><a>Github 笔记</a></h3></div><div class="post-content"><p><a href="http://rogerdudler.github.io/git-guide/index.zh.html" target="_blank">新手指南</a></p>
+<h3 id="git-配置"><a href="#git-配置" class="headerlink" title="git 配置"></a>git 配置</h3><p>下载完 git 之后，需要进行一些 SSH，邮箱用户等配置  </p>
+<h5 id="SSH"><a href="#SSH" class="headerlink" title="SSH"></a>SSH</h5><p>什么是 SSH？简单点说，SSH是一种网络协议，用于计算机之间的加密登录。而 Github 就是利用你的 SSH 来对你进行身份验证。所以想在 Github 上提交代码，第一步就是添加 ssh key 配置。  </p>
+<p>在 Windows ，安装 Git 后会自动安装 SSH。  </p>
+<ul>
+<li>cmd 输入 ssh，看是否安装成功</li>
+<li><code>ssh-keygen -t rsa</code> 指定 rsa 算法生成密匙，然后生成 id_rsa 和 id_rsa.pub  </li>
+<li>打开 Github 界面，settings —— SSH and GPG keys —— NEW SSH key  </li>
+<li>把 id_rsa.pub 内容添加进来</li>
+<li>cmd 输入 <code>ssh -T git@github.com</code> 进行测试</li>
+</ul>
+<h5 id="设置邮箱与用户名"><a href="#设置邮箱与用户名" class="headerlink" title="设置邮箱与用户名"></a>设置邮箱与用户名</h5><pre><code>git config —global user.name “name”  
+git config —global user.email “name@gmail.com”
+</code></pre><h3 id="术语解释"><a href="#术语解释" class="headerlink" title="术语解释"></a>术语解释</h3><h5 id="Repository：仓库"><a href="#Repository：仓库" class="headerlink" title="Repository：仓库"></a>Repository：仓库</h5><p>一个仓库包括了所有的版本信息、所有的分支和标记信息  </p>
+<ul>
+<li>git init 新建仓库</li>
+<li>git clone 克隆分区到本地</li>
+</ul>
+<h5 id="工作流"><a href="#工作流" class="headerlink" title="工作流"></a>工作流</h5><p>本地仓库由 git 维护的三棵「树」。第一个是工作目录，第二个是暂存区，最后是 HEAD，指向最后一次提交结果。</p>
+<h5 id="Workspace：工作区"><a href="#Workspace：工作区" class="headerlink" title="Workspace：工作区"></a>Workspace：工作区</h5><ul>
+<li>执行 <code>git add .</code> 命令相当于把代码改动提交到暂存区  </li>
+<li><code>git pull</code> 将远程仓库的数据拉到本地仓库并合并    </li>
+</ul>
+<h5 id="Index：暂存区"><a href="#Index：暂存区" class="headerlink" title="Index：暂存区"></a>Index：暂存区</h5><ul>
+<li><code>git commit -m &#39;说明&#39;</code> 相当于把改动提交到了当前分支(HEAD)  </li>
+</ul>
+<h5 id="Branches：分支"><a href="#Branches：分支" class="headerlink" title="Branches：分支"></a>Branches：分支</h5><p>可以从已有的代码中生成一个新的分支，这个分支与剩余的分支完全独立。默认的分支往往是叫master。  </p>
+<pre><code>git checkout -b [baranch-name] 创建新分支
+git checkout master  切换回主分支
+git branch -d [baranch-name]  删除分支
+git push origin [branch-name]  上传分支
+</code></pre><h5 id="Tags：标记"><a href="#Tags：标记" class="headerlink" title="Tags：标记"></a>Tags：标记</h5><ul>
+<li>标记指的是某个分支某个特定时间点的状态。通过标记，可以很方便的切换到标记时的状态。</li>
+<li><code>git tag 1.0.0 1b2e1d63ff</code>  创建一个叫 1.0.0 的标签</li>
+<li>1b2e1d63ff 是你想要标记的提交 ID 的前 10 位字符，可用 <code>git log</code> 获取提交的 ID</li>
+</ul>
+<h3 id="上传"><a href="#上传" class="headerlink" title="上传"></a>上传</h3><p>以 test 项目为例。<br>在本地执行 <code>git clone https://github.com/pansy-cx/test.git</code> </p>
+<p>这样就把 test 项目 clone 到了本地，这个时候该项目本身就已经是一个git 仓库了，不需要执行 git init 进行初始化，而且甚至都已经关联好了远程仓库，我们只需要在这个 test 目录下任意修改或者添加文件，然后进行 commit 。<br>接下来执行代码：  </p>
+<pre><code>git add .     提出更改 添加到暂存区
+git commit -m &apos;commit&apos;  提交到 HEAD
+git push origin master  将改动提交到远端仓库
+如果你还没有克隆现有仓库，并欲将你的仓库连接到某个远程服务器(test 项目)，你可以使用如下命令添加:
+git remote add origin https://github.com/pansy-cx/test.git
+</code></pre><p>如果执行 git remote 这步出现错误：</p>
+<pre><code>fatal: remote origin already exists
+</code></pre><p>意思是远程仓库已经存在    </p>
+<p>执行以下语句  </p>
+<pre><code>git remote rm origin
+</code></pre><p>把原来仓库删除<br>再重复执行一次  <code>git remote add origin https://github.com/pansy-cx/test.git</code> 即可<br>如果执行 git push 这步出现错误：  </p>
+<pre><code>error:failed to push som refs to.......
+</code></pre><p>先把远程服务器 github 上面的文件 pull(拉) 下来，再 push(推) 上去。  </p>
+<p>执行以下语句  </p>
+<pre><code>git pull origin master
+</code></pre><p>再重复执行 <code>git push origin master</code></p>
+</div><div class="post-footer"><div class="meta"><div class="info"><i class="fa fa-sun-o"></i><span class="date">2017-03-24</span><i class="fa fa-tag"></i><a class="tag" href="/tags/Git/" title="Git">Git </a></div></div></div></div><div class="share"><div class="evernote"><a class="fa fa-bookmark" href="javascript:(function(){EN_CLIP_HOST='http://www.evernote.com';try{var%20x=document.createElement('SCRIPT');x.type='text/javascript';x.src=EN_CLIP_HOST+'/public/bookmarkClipper.js?'+(new%20Date().getTime()/100000);document.getElementsByTagName('head')[0].appendChild(x);}catch(e){location.href=EN_CLIP_HOST+'/clip.action?url='+encodeURIComponent(location.href)+'&amp;title='+encodeURIComponent(document.title);}})();" ref="nofollow" target="_blank"></a></div><div class="weibo"><a class="fa fa-weibo" href="javascript:void((function(s,d,e){try{}catch(e){}var f='http://service.weibo.com/share/share.php?',u=d.location.href,p=['url=',e(u),'&amp;title=',e(d.title),'&amp;appkey=2924220432'].join('');function a(){if(!window.open([f,p].join(''),'mb',['toolbar=0,status=0,resizable=1,width=620,height=450,left=',(s.width-620)/2,',top=',(s.height-450)/2].join('')))u.href=[f,p].join('');};if(/Firefox/.test(navigator.userAgent)){setTimeout(a,0)}else{a()}})(screen,document,encodeURIComponent));"></a></div><div class="twitter"><a class="fa fa-twitter" href="http://twitter.com/home?status=,http://idmrchan.com/2017/03/24/github-notepad/,Virgil Chan,Github 笔记,;"></a></div></div><div class="pagination"><ul class="clearfix"><li class="pre pagbuttons"><a class="btn" role="navigation" href="/2017/04/09/VueRouter-VueResource-webpack/" title="vue-router + vue-resource + webpack 配置">上一篇</a></li><li class="next pagbuttons"><a class="btn" role="navigation" href="/2017/03/22/imitate-jquery-slideUp/" title="仿 jQuery slideUp/slideOut 效果">下一篇</a></li></ul></div></div></div></div></div><script src="/js/jquery.js"></script><script src="/js/jquery-migrate-1.2.1.min.js"></script><script src="/js/jquery.appear.js"></script></body></html>

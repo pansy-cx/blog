@@ -1,0 +1,74 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="X-UA-Compatible" content="IE=edge"><meta name="author" content="Virigl,mrchan3668@gmail.com"><title>从输入URL到页面呈现内容发生了什么 · Virgil Chan</title><meta name="description" content="DNS 解析DNS 解析就是将 URL 转化为 IP 的过程，电脑会不断地在域名服务器中查询 IP 地址，直到找到为止，所以当我们输入网址到浏览器找到 IP 时会有 10～50 ms 的延迟。DNS 会将查询过的 DNS 进行缓存，分为浏览器缓存，系统缓存，路由器缓存，IPS服务器缓存，根域名服务器"><meta name="keywords" content="HTML,CSS,JavaScript,Vue,AngularJS,WebPack,UnderScore,System,Raspberry,Tool,Linux,WordPress,NodeJS,MongoDB,Git,Python"><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport"><meta content="yes" name="apple-mobile-web-app-capable"><meta content="black" name="apple-mobile-web-app-status-bar-style"><meta content="telephone=no" name="format-detection"><meta name="renderer" content="webkit"><link rel="short icon" href="/images/favicon.png" type="image/x-icon"><link rel="stylesheet" href="/css/style.css"><link rel="stylesheet" href="/css/blog_basic.css"><link rel="stylesheet" href="/css/font-awesome.min.css"><link rel="alternate" type="application/atom+xml" title="ATOM 1.0" href="/atom.xml"><link rel="manifest" href="/manifest.json"></head><body><div class="sidebar animated fadeInDown"><div class="logo-title"><div class="title"><img src="/images/favicon.png" style="width:127px;"><h3 title=""><a href="/">Virgil Chan</a></h3><div class="description"><p>间歇性凌云壮志，持续性混吃等死</p></div></div></div><ul class="social-links"><li><a href="http://www.feed43.com/6708067855351261.xml"><i class="fa fa-rss"></i></a></li><li><a href="http://weibo.com/1953548815"><i class="fa fa-weibo"></i></a></li><li><a href="http://github.com/pansy-cx"><i class="fa fa-github"></i></a></li></ul><div class="footer"><a target="_blank" href="/"><span>Theme by </span></a><a href="https://www.caicai.me"> CaiCai </a><span>&</span><a href="https://github.com/Ben02/hexo-theme-Anatole"> Ben</a><div class="by_farbox"><a href="https://hexo.io/zh-cn/" target="_blank">Proudly published with Hexo&#65281;</a></div></div></div><div class="main"><div class="page-top animated fadeInDown"><div class="nav"><li><a href="/">首页</a></li><li><a href="/about">关于</a></li><li><a href="/archives">归档</a></li></div><div class="information"><div class="back_btn"><li><a class="fa fa-chevron-left" onclick="window.history.go(-1)"> </a></li></div><div class="avatar"><img src="/images/favicon.png"></div></div></div><div class="autopagerize_page_element"><div class="content"><div class="post-page"><div class="post animated fadeInDown"><div class="post-title"><h3><a>从输入URL到页面呈现内容发生了什么</a></h3></div><div class="post-content"><h3 id="DNS-解析"><a href="#DNS-解析" class="headerlink" title="DNS 解析"></a>DNS 解析</h3><p>DNS 解析就是将 URL 转化为 IP 的过程，电脑会不断地在域名服务器中查询 IP 地址，直到找到为止，所以当我们输入网址到浏览器找到 IP 时会有 10～50 ms 的延迟。<br>DNS 会将查询过的 DNS 进行缓存，分为浏览器缓存，系统缓存，路由器缓存，IPS服务器缓存，根域名服务器缓存，顶级域名服务器缓存，主域名服务器缓存。浏览器缓存如 chrome 在 chrome://dns/ 内可以看到，系统缓存在 hosts 文件内。  </p>
+<h3 id="TCP-连接"><a href="#TCP-连接" class="headerlink" title="TCP 连接"></a>TCP 连接</h3><p>浏览器得到 IP 后，就像服务器发送 TCP 请求，TCP 是传输层的一种可靠的请求，HTTP 就是基于 TCP 的连接方式。</p>
+<h5 id="TCP-标志位"><a href="#TCP-标志位" class="headerlink" title="TCP 标志位"></a>TCP 标志位</h5><ul>
+<li>SYN 建立连接</li>
+<li>ACK 确认</li>
+<li>PSH push 传送</li>
+<li>FIN 结束</li>
+<li>RST 重置</li>
+<li>URG 紧急</li>
+</ul>
+<h5 id="三次握手"><a href="#三次握手" class="headerlink" title="三次握手"></a>三次握手</h5><p>当客户端要与服务端通信时，需要三次握手：</p>
+<ul>
+<li>第一次握手，客户端发送 SYN 包到 服务器，并进入 SYN_SEND 状态等待确认</li>
+<li>第二次握手，服务器接收到 SYN 包后，也发送给客户端一个 SYN+ACK 包，并进入 SYN_RECV 状态</li>
+<li>第三次握手， 客户端收到 SYN+ACK 包，向服务端发送一个 ACK 包，双方都进入 ESTABLISHED 状态，代表可以互相通信。</li>
+</ul>
+<p>为什么要三次握手，因为通信双方不能保证对方一定能收到信息，网络在信道中传输是具有不稳定性的。用通俗的话来将三次握手就是：</p>
+<blockquote>
+<p>A：喂你听到了吗，B：喂我听到了你听得到吗，A：嗯我也听得到</p>
+</blockquote>
+<h5 id="四次挥手"><a href="#四次挥手" class="headerlink" title="四次挥手"></a>四次挥手</h5><p>TCP 连接时全双工的，就是互相都可收发信息，所以当断开连接时，需要互相确认对方是否断开连接了，否则当信号发送不稳定时会出现一方已断开另一方还在连接的情况。<br>例如当客户端要断开连接</p>
+<ul>
+<li>客户端发送一个 FIN 包</li>
+<li>服务器收到 FIN，发送一个 ACK 包</li>
+<li>服务器关闭连接，并发送一个 FIN 包后进入关闭状态</li>
+<li>客户端回 ACK 包确认，并进入关闭状态，一段时间后无反应就断开连接，服务器端收到后也关闭连接</li>
+</ul>
+<h3 id="HTTP-请求"><a href="#HTTP-请求" class="headerlink" title="HTTP 请求"></a>HTTP 请求</h3><p>TCP 连接建立成功后，可以互相通信，HTTP 就发送请求下载服务器资源。HTTP 请求分为三部分组成：请求行、消息报头、请求正文</p>
+<ul>
+<li><p>请求行<br>请求行格式如下：Method Request-URI HTTP-Version CRLF<br>Method 为请求方法，Request-URI 为请求的资源路径 HTTP-Version 为版本，CRLF 表示回车或换行结尾。<br>Method 各个方法解释如下：</p>
+<ul>
+<li>GET     请求获取Request-URI所标识的资源  </li>
+<li>POST    在Request-URI所标识的资源后附加新的数据  </li>
+<li>HEAD    请求获取由Request-URI所标识的资源的响应消息报头  </li>
+<li>PUT     请求服务器存储一个资源，并用Request-URI作为其标识  </li>
+<li>DELETE  请求服务器删除Request-URI所标识的资源  </li>
+<li>TRACE   请求服务器回送收到的请求信息，主要用于测试或诊断  </li>
+<li>CONNECT 保留将来使用  </li>
+<li>OPTIONS 请求查询服务器的性能，或者查询与资源相关的选项和需求  </li>
+</ul>
+</li>
+</ul>
+<p>所以，一个 GET 请求格式如下：eg:GET/index.html HTTP/1.1(CRLF)</p>
+<ul>
+<li>消息报头<br>请求报头允许客户端向服务器传递请求的附加信息和客户端自身的信息。常见的请求报头有: Accept, Accept-Charset, Accept-Encoding, Accept-Language, Content-Type, Authorization, Cookie, User-Agent等。</li>
+<li>请求正文<br>当使用POST, PUT等方法时，通常需要客户端向服务器传递数据。这些数据就储存在请求正文中。在请求包头中有一些与请求正文相关的信息，请求的数据格式一般为json。</li>
+</ul>
+<h3 id="HTTP-响应"><a href="#HTTP-响应" class="headerlink" title="HTTP 响应"></a>HTTP 响应</h3><p>服务器接收请求后，会返回相应，分为是：状态行、消息报头、响应正文。这里主要看状态行。<br>状态行格式如下：HTTP-Version Status-Code Reason-Phrase CRLF<br>HTTP-Version 表示服务器HTTP协议的版本；Status-Code 表示服务器发回的响应状态代码；Reason-Phrase 表示状态代码的文本描述。<br>Status-Code 分为 5 类：</p>
+<ul>
+<li>1xx：指示信息 – 表示请求已接收，继续处理</li>
+<li>2xx：成功–表示请求已被成功接收、理解、接受</li>
+<li>3xx：重定向–要完成请求必须进行更进一步的操作</li>
+<li>4xx：客户端错误–请求有语法错误或请求无法实现</li>
+<li>5xx：服务器端错误–服务器未能实现合法的请求</li>
+</ul>
+<p>常见的有如下：</p>
+<ul>
+<li>200 OK：请求成功</li>
+<li>400 Bad Request：客户端请求有语法错误</li>
+<li>401 Unauthorized：请求未经授权</li>
+<li>403 Forbidden：服务器收到请求，但是拒绝提供服务</li>
+<li>404 Not Found：请求资源不存在</li>
+<li>500 Internal Server Error：服务器发生不可预期的错误</li>
+<li>503 Server Unavailable：服务器当前不能处理客户端的请求</li>
+</ul>
+<p>如一个成功的响应状态行如下：eg:HTTP/1.1 200 OK</p>
+<h3 id="渲染页面"><a href="#渲染页面" class="headerlink" title="渲染页面"></a>渲染页面</h3><p>获取服务器代码后，浏览器开始下载并解析 HTML、SVG、CSS、JavaScript 等脚本。<br>解析后会生成两个内部数据结构，DOM 树和 渲染树，DOM 树表示页面结构，渲染树表示 DOM 节点如何显示。一旦两棵树构建完成，浏览器就开始绘制页面元素。<br>可以看出，DOM 树和渲染树主要由 HTML 和 CSS 解析得来，当浏览器遇到 <code>&lt;script&gt;</code> 脚本时，会停止 DOM 树的构建，先下载和解析 JS 脚本，所以最好将 JS 放页面底部，CSS 放 head 内，这样可以让浏览器最优先绘制出页面。</p>
+<h5 id="重排-reflow-与重绘-repaint"><a href="#重排-reflow-与重绘-repaint" class="headerlink" title="重排(reflow)与重绘(repaint)"></a>重排(reflow)与重绘(repaint)</h5><p>当 DOM 变化影响到元素的几何属性，如宽高的变化，增加段落等，这时浏览器需要重新计算元素的几何属性，并重新构造渲染树，这个过程称为重排，重排完成后，浏览器将所有受影响的部分重绘到屏幕上。<br>当然不是所有的情况都需要重排，例如修改某个元素的背景颜色，元素位置不发生变化，就只需要执行一次重绘。<br>重排和重绘都是需要耗费昂贵的代价，所以要尽可能避免。</p>
+<ul>
+<li>当修改元素位置或大小时，尽可能不要使整个页面都发生变化，而是只变化一小部分。如使用 <code>display:none</code> 先将其脱离文档流</li>
+<li>批量的修改 DOM,使其一次性渲染</li>
+<li>使用事件委托，减少被绑定的事件处理器。<a href="http://idmrchan.com/2017/05/10/javascript-event/" target="_blank">事件委托</a>  </li>
+</ul>
+</div><div class="post-footer"><div class="meta"><div class="info"><i class="fa fa-sun-o"></i><span class="date">2017-07-23</span><i class="fa fa-tag"></i><a class="tag" href="/tags/HTTP/" title="HTTP">HTTP </a></div></div></div></div><div class="share"><div class="evernote"><a class="fa fa-bookmark" href="javascript:(function(){EN_CLIP_HOST='http://www.evernote.com';try{var%20x=document.createElement('SCRIPT');x.type='text/javascript';x.src=EN_CLIP_HOST+'/public/bookmarkClipper.js?'+(new%20Date().getTime()/100000);document.getElementsByTagName('head')[0].appendChild(x);}catch(e){location.href=EN_CLIP_HOST+'/clip.action?url='+encodeURIComponent(location.href)+'&amp;title='+encodeURIComponent(document.title);}})();" ref="nofollow" target="_blank"></a></div><div class="weibo"><a class="fa fa-weibo" href="javascript:void((function(s,d,e){try{}catch(e){}var f='http://service.weibo.com/share/share.php?',u=d.location.href,p=['url=',e(u),'&amp;title=',e(d.title),'&amp;appkey=2924220432'].join('');function a(){if(!window.open([f,p].join(''),'mb',['toolbar=0,status=0,resizable=1,width=620,height=450,left=',(s.width-620)/2,',top=',(s.height-450)/2].join('')))u.href=[f,p].join('');};if(/Firefox/.test(navigator.userAgent)){setTimeout(a,0)}else{a()}})(screen,document,encodeURIComponent));"></a></div><div class="twitter"><a class="fa fa-twitter" href="http://twitter.com/home?status=,http://idmrchan.com/2017/07/23/http-detailed/,Virgil Chan,从输入URL到页面呈现内容发生了什么,;"></a></div></div><div class="pagination"><ul class="clearfix"><li class="pre pagbuttons"><a class="btn" role="navigation" href="/2017/08/02/javascript-vue-simple-compile/" title="JavaScript 仿 vue 指令解析">上一篇</a></li><li class="next pagbuttons"><a class="btn" role="navigation" href="/2017/06/21/javascript-mvc-simple-relize/" title="JavaScript MVC 简单实现">下一篇</a></li></ul></div></div></div></div></div><script src="/js/jquery.js"></script><script src="/js/jquery-migrate-1.2.1.min.js"></script><script src="/js/jquery.appear.js"></script></body></html>

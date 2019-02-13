@@ -1,0 +1,36 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="X-UA-Compatible" content="IE=edge"><meta name="author" content="Virigl,mrchan3668@gmail.com"><title>Mac 下安装和配置 Mysql · Virgil Chan</title><meta name="description" content="安装和配置 Mysql使用 brew 安装brew install mysql
+配置 Mysqlmysql.server start   开启
+/usr/local/opt/mysql/bin/mysql_secure_installation  mysql 配置向导
+
+VALIDATE PASSW"><meta name="keywords" content="HTML,CSS,JavaScript,Vue,AngularJS,WebPack,UnderScore,System,Raspberry,Tool,Linux,WordPress,NodeJS,MongoDB,Git,Python"><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport"><meta content="yes" name="apple-mobile-web-app-capable"><meta content="black" name="apple-mobile-web-app-status-bar-style"><meta content="telephone=no" name="format-detection"><meta name="renderer" content="webkit"><link rel="short icon" href="/images/favicon.png" type="image/x-icon"><link rel="stylesheet" href="/css/style.css"><link rel="stylesheet" href="/css/blog_basic.css"><link rel="stylesheet" href="/css/font-awesome.min.css"><link rel="alternate" type="application/atom+xml" title="ATOM 1.0" href="/atom.xml"><link rel="manifest" href="/manifest.json"></head><body><div class="sidebar animated fadeInDown"><div class="logo-title"><div class="title"><img src="/images/favicon.png" style="width:127px;"><h3 title=""><a href="/">Virgil Chan</a></h3><div class="description"><p>间歇性凌云壮志，持续性混吃等死</p></div></div></div><ul class="social-links"><li><a href="http://www.feed43.com/6708067855351261.xml"><i class="fa fa-rss"></i></a></li><li><a href="http://weibo.com/1953548815"><i class="fa fa-weibo"></i></a></li><li><a href="http://github.com/pansy-cx"><i class="fa fa-github"></i></a></li></ul><div class="footer"><a target="_blank" href="/"><span>Theme by </span></a><a href="https://www.caicai.me"> CaiCai </a><span>&</span><a href="https://github.com/Ben02/hexo-theme-Anatole"> Ben</a><div class="by_farbox"><a href="https://hexo.io/zh-cn/" target="_blank">Proudly published with Hexo&#65281;</a></div></div></div><div class="main"><div class="page-top animated fadeInDown"><div class="nav"><li><a href="/">首页</a></li><li><a href="/about">关于</a></li><li><a href="/archives">归档</a></li></div><div class="information"><div class="back_btn"><li><a class="fa fa-chevron-left" onclick="window.history.go(-1)"> </a></li></div><div class="avatar"><img src="/images/favicon.png"></div></div></div><div class="autopagerize_page_element"><div class="content"><div class="post-page"><div class="post animated fadeInDown"><div class="post-title"><h3><a>Mac 下安装和配置 Mysql</a></h3></div><div class="post-content"><h3 id="安装和配置-Mysql"><a href="#安装和配置-Mysql" class="headerlink" title="安装和配置 Mysql"></a>安装和配置 Mysql</h3><h5 id="使用-brew-安装"><a href="#使用-brew-安装" class="headerlink" title="使用 brew 安装"></a>使用 brew 安装</h5><pre><code>brew install mysql
+</code></pre><h5 id="配置-Mysql"><a href="#配置-Mysql" class="headerlink" title="配置 Mysql"></a>配置 Mysql</h5><pre><code>mysql.server start   开启
+/usr/local/opt/mysql/bin/mysql_secure_installation  mysql 配置向导
+</code></pre><blockquote>
+<p>VALIDATE PASSWORD PLUGIN can be used to test passwordsand improve security. It     checks the strength of password and allows the users to set only those passwords which are secure enough. Would you like to setup VALIDATE PASSWORD plugin?<br>Press y|Y for Yes, any other key for No: k //是否采用mysql密码安全检测插件</p>
+</blockquote>
+<p>这里选择否，个人使用不需要开启 <code>valid_password</code> 插件，密码需要设置的很复杂，我就折腾了半天。。。</p>
+<p>然后就是输入密码，其他的一路选 <code>y</code> 就行</p>
+<h5 id="开启-Mysql"><a href="#开启-Mysql" class="headerlink" title="开启 Mysql"></a>开启 Mysql</h5><ul>
+<li>mysql.server start       开启</li>
+<li>mysql.server stop        关闭</li>
+<li>mysql.server restart     重启</li>
+</ul>
+<h5 id="登陆"><a href="#登陆" class="headerlink" title="登陆"></a>登陆</h5><pre><code>mysql -u root -p
+</code></pre><h5 id="关闭-valid-password-前密码检测"><a href="#关闭-valid-password-前密码检测" class="headerlink" title="关闭 valid-password 前密码检测"></a>关闭 valid-password 前密码检测</h5><p>如果不小心开了 valid-password，可以在配置里关了，在重设密码</p>
+<p>先把 Mysql 关了</p>
+<pre><code>mysql.server stop
+
+mysqld --help --verbose | more   查看帮助
+</code></pre><p>输出</p>
+<blockquote>
+<p>Default options are read from the following files in the given order:<br>/etc/my.cnf /etc/mysql/my.cnf /usr/local/etc/my.cnf ~/.my.cnf</p>
+</blockquote>
+<p>Mysql 读取配置顺序如上，我们在 /etc 下创建 my.cnf</p>
+<p>添加</p>
+<figure class="highlight vim"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[mysqld]</span><br><span class="line">validate_password=off</span><br></pre></td></tr></table></figure>
+<p>重设密码</p>
+<pre><code>mysqladmin -u root -p password newpassword
+</code></pre><h3 id="Python-Mysql-库安装"><a href="#Python-Mysql-库安装" class="headerlink" title="Python-Mysql 库安装"></a>Python-Mysql 库安装</h3><pre><code>brew install mysql-connector-c
+pip install mysql-python
+</code></pre><p>一定要先安装 Mysql 在安装 mysql-python</p>
+</div><div class="post-footer"><div class="meta"><div class="info"><i class="fa fa-sun-o"></i><span class="date">2017-12-05</span><i class="fa fa-tag"></i><a class="tag" href="/tags/Mysql/" title="Mysql">Mysql </a></div></div></div></div><div class="share"><div class="evernote"><a class="fa fa-bookmark" href="javascript:(function(){EN_CLIP_HOST='http://www.evernote.com';try{var%20x=document.createElement('SCRIPT');x.type='text/javascript';x.src=EN_CLIP_HOST+'/public/bookmarkClipper.js?'+(new%20Date().getTime()/100000);document.getElementsByTagName('head')[0].appendChild(x);}catch(e){location.href=EN_CLIP_HOST+'/clip.action?url='+encodeURIComponent(location.href)+'&amp;title='+encodeURIComponent(document.title);}})();" ref="nofollow" target="_blank"></a></div><div class="weibo"><a class="fa fa-weibo" href="javascript:void((function(s,d,e){try{}catch(e){}var f='http://service.weibo.com/share/share.php?',u=d.location.href,p=['url=',e(u),'&amp;title=',e(d.title),'&amp;appkey=2924220432'].join('');function a(){if(!window.open([f,p].join(''),'mb',['toolbar=0,status=0,resizable=1,width=620,height=450,left=',(s.width-620)/2,',top=',(s.height-450)/2].join('')))u.href=[f,p].join('');};if(/Firefox/.test(navigator.userAgent)){setTimeout(a,0)}else{a()}})(screen,document,encodeURIComponent));"></a></div><div class="twitter"><a class="fa fa-twitter" href="http://twitter.com/home?status=,http://idmrchan.com/2017/12/05/python-mysql/,Virgil Chan,Mac 下安装和配置 Mysql,;"></a></div></div><div class="pagination"><ul class="clearfix"><li class="pre pagbuttons"><a class="btn" role="navigation" href="/2017/12/07/raspberry-date-sync/" title="记录我树莓派的玄学日期修改">上一篇</a></li><li class="next pagbuttons"><a class="btn" role="navigation" href="/2017/12/04/python-socket-img/" title="Python 建立 socket 通信传输图像">下一篇</a></li></ul></div></div></div></div></div><script src="/js/jquery.js"></script><script src="/js/jquery-migrate-1.2.1.min.js"></script><script src="/js/jquery.appear.js"></script></body></html>

@@ -1,0 +1,36 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="X-UA-Compatible" content="IE=edge"><meta name="author" content="Virigl,mrchan3668@gmail.com"><title>搭建 Git 服务器及配置 Hook · Virgil Chan</title><meta name="description" content="首先在服务器上配置 Git，这里用的是 Ubuntu
+sudo apt-get install git     安装 Git
+sudo adduser git         添加一个 git 用户
+将 id_rsa.pub 公钥添加到到服务器 /home/git/.ssh/authorized_k"><meta name="keywords" content="HTML,CSS,JavaScript,Vue,AngularJS,WebPack,UnderScore,System,Raspberry,Tool,Linux,WordPress,NodeJS,MongoDB,Git,Python"><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport"><meta content="yes" name="apple-mobile-web-app-capable"><meta content="black" name="apple-mobile-web-app-status-bar-style"><meta content="telephone=no" name="format-detection"><meta name="renderer" content="webkit"><link rel="short icon" href="/images/favicon.png" type="image/x-icon"><link rel="stylesheet" href="/css/style.css"><link rel="stylesheet" href="/css/blog_basic.css"><link rel="stylesheet" href="/css/font-awesome.min.css"><link rel="alternate" type="application/atom+xml" title="ATOM 1.0" href="/atom.xml"><link rel="manifest" href="/manifest.json"></head><body><div class="sidebar animated fadeInDown"><div class="logo-title"><div class="title"><img src="/images/favicon.png" style="width:127px;"><h3 title=""><a href="/">Virgil Chan</a></h3><div class="description"><p>间歇性凌云壮志，持续性混吃等死</p></div></div></div><ul class="social-links"><li><a href="http://www.feed43.com/6708067855351261.xml"><i class="fa fa-rss"></i></a></li><li><a href="http://weibo.com/1953548815"><i class="fa fa-weibo"></i></a></li><li><a href="http://github.com/pansy-cx"><i class="fa fa-github"></i></a></li></ul><div class="footer"><a target="_blank" href="/"><span>Theme by </span></a><a href="https://www.caicai.me"> CaiCai </a><span>&</span><a href="https://github.com/Ben02/hexo-theme-Anatole"> Ben</a><div class="by_farbox"><a href="https://hexo.io/zh-cn/" target="_blank">Proudly published with Hexo&#65281;</a></div></div></div><div class="main"><div class="page-top animated fadeInDown"><div class="nav"><li><a href="/">首页</a></li><li><a href="/about">关于</a></li><li><a href="/archives">归档</a></li></div><div class="information"><div class="back_btn"><li><a class="fa fa-chevron-left" onclick="window.history.go(-1)"> </a></li></div><div class="avatar"><img src="/images/favicon.png"></div></div></div><div class="autopagerize_page_element"><div class="content"><div class="post-page"><div class="post animated fadeInDown"><div class="post-title"><h3><a>搭建 Git 服务器及配置 Hook</a></h3></div><div class="post-content"><p>首先在服务器上配置 Git，这里用的是 Ubuntu</p>
+<pre><code>sudo apt-get install git     安装 Git
+sudo adduser git         添加一个 git 用户
+</code></pre><p>将 <code>id_rsa.pub</code> 公钥添加到到服务器 <code>/home/git/.ssh/authorized_keys</code></p>
+<p>选择一个文件夹作为 Git 仓库，假定在 <code>/home/git</code> 里</p>
+<pre><code>sudo git init --bare sample.git
+sudo chown -R git:git sample.git    修改为 Git 的权限，否则会禁止访问
+</code></pre><p>bare 是裸仓库，<a href="https://segmentfault.com/a/1190000007686496" target="_blank">裸仓库与普通仓库的区别</a>简单的理解，裸仓库用于远程服务器的上传，保存历史记录等各种信息，但不能操作 Git，不能保存文件，纯粹是为了共享。</p>
+<p>然后客户端</p>
+<pre><code>git clone git@server:/home/git/sample.git
+// 往里面添加内容
+git add .
+git commit -m &apos;修改内容&apos;
+git push origin master
+// 跟 GitHub 更新没什么差别
+</code></pre><p>那么问题来了，裸仓库只用于共享，并没有保存文件，我要在服务器上获取文件，假定要 <code>/home/virgil/blog</code> 放本地上传的代码</p>
+<pre><code>cd /home/virgil/blog
+git clone /home/git/blog.git
+// 之后在修改代码
+cd blog
+git pull
+</code></pre><p>但是每次本地 push 完后还要在到服务器 pull 一次，很麻烦，幸好 Git 提供了 Hook 操作。</p>
+<p>Hook 就是钩子的意思，比如说提交前触发，更新时触发，提交后触发之类。</p>
+<p>在远程服务器，及裸仓库中，可以看到有一个 hooks 文件夹，里面放着各种各样钩子用法的例子，文件名去掉 .sample 就可以用，这里我用的是 post-receive，当我们在本地执行 push 命令到 git 服务器的时候，服务器会自动触发 post-receive 钩子。</p>
+<pre><code>vim /home/git/sample.git/hooks/post-receive
+</code></pre><p>里面内容</p>
+<figure class="highlight vim"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">#!/bin/<span class="keyword">sh</span></span><br><span class="line"><span class="keyword">cd</span> /home/virgil/blog || <span class="keyword">exit</span></span><br><span class="line">unset GIT_DIR # 还原环境变量，不加会报错</span><br><span class="line">git pull origin master</span><br></pre></td></tr></table></figure>
+<p>保存后修改权限</p>
+<pre><code>chmod +x /home/git/sample.git/hooks/post-receive
+</code></pre><p>这里需要注意， <code>/home/virgil/blog</code> 也需要修改权限，修改为 git 权限，否则 <code>git pull</code> 时会访问不到权限</p>
+<pre><code>chown -R git:git /home/virgil/blog
+</code></pre><p>这样就 Ok 了，可以测试一下，在本地 push 之后服务器是否会自动 pull 代码下来。</p>
+</div><div class="post-footer"><div class="meta"><div class="info"><i class="fa fa-sun-o"></i><span class="date">2018-02-02</span><i class="fa fa-tag"></i><a class="tag" href="/tags/Git/" title="Git">Git </a></div></div></div></div><div class="share"><div class="evernote"><a class="fa fa-bookmark" href="javascript:(function(){EN_CLIP_HOST='http://www.evernote.com';try{var%20x=document.createElement('SCRIPT');x.type='text/javascript';x.src=EN_CLIP_HOST+'/public/bookmarkClipper.js?'+(new%20Date().getTime()/100000);document.getElementsByTagName('head')[0].appendChild(x);}catch(e){location.href=EN_CLIP_HOST+'/clip.action?url='+encodeURIComponent(location.href)+'&amp;title='+encodeURIComponent(document.title);}})();" ref="nofollow" target="_blank"></a></div><div class="weibo"><a class="fa fa-weibo" href="javascript:void((function(s,d,e){try{}catch(e){}var f='http://service.weibo.com/share/share.php?',u=d.location.href,p=['url=',e(u),'&amp;title=',e(d.title),'&amp;appkey=2924220432'].join('');function a(){if(!window.open([f,p].join(''),'mb',['toolbar=0,status=0,resizable=1,width=620,height=450,left=',(s.width-620)/2,',top=',(s.height-450)/2].join('')))u.href=[f,p].join('');};if(/Firefox/.test(navigator.userAgent)){setTimeout(a,0)}else{a()}})(screen,document,encodeURIComponent));"></a></div><div class="twitter"><a class="fa fa-twitter" href="http://twitter.com/home?status=,http://idmrchan.com/2018/02/02/git-server-create/,Virgil Chan,搭建 Git 服务器及配置 Hook,;"></a></div></div><div class="pagination"><ul class="clearfix"><li class="pre pagbuttons"><a class="btn" role="navigation" href="/2018/05/11/angularjs-intro/" title="AngularJS 使用介绍">上一篇</a></li><li class="next pagbuttons"><a class="btn" role="navigation" href="/2017/12/24/vue-01-find-input/" title="从 Vue 源码学前端（01） —— 找到入口文件">下一篇</a></li></ul></div></div></div></div></div><script src="/js/jquery.js"></script><script src="/js/jquery-migrate-1.2.1.min.js"></script><script src="/js/jquery.appear.js"></script></body></html>
