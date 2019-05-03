@@ -1,0 +1,64 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="X-UA-Compatible" content="IE=edge"><meta name="author" content="Virigl,mrchan3668@gmail.com"><title>微信开发过程常见问题总结 · Virgil Chan</title><meta name="description" content="Q：小程序鉴权机制？
+wx.getSetting 获取当前用户授权状态。
+
+wx.authorize 提前向用户获取授权权限。
+
+wx.login 获取登陆信息（code），后台通过 code 请求微信登陆凭证校验接口，拿到 openId 和 sessionkey(用于校验)。
+
+wx.getUse"><meta name="keywords" content="HTML,CSS,JavaScript,Vue,AngularJS,WebPack,UnderScore,System,Raspberry,Tool,Linux,WordPress,NodeJS,MongoDB,Git,Python"><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport"><meta content="yes" name="apple-mobile-web-app-capable"><meta content="black" name="apple-mobile-web-app-status-bar-style"><meta content="telephone=no" name="format-detection"><meta name="renderer" content="webkit"><link rel="short icon" href="/images/favicon.png" type="image/x-icon"><link rel="stylesheet" href="/css/style.css"><link rel="stylesheet" href="/css/blog_basic.css"><link rel="stylesheet" href="/css/font-awesome.min.css"><link rel="alternate" type="application/atom+xml" title="ATOM 1.0" href="/atom.xml"><link rel="manifest" href="/manifest.json"></head><body><div class="sidebar animated fadeInDown"><div class="logo-title"><div class="title"><img src="/images/favicon.png" style="width:127px;"><h3 title=""><a href="/">Virgil Chan</a></h3><div class="description"><p>间歇性凌云壮志，持续性混吃等死</p></div></div></div><ul class="social-links"><li><a href="http://www.feed43.com/6708067855351261.xml"><i class="fa fa-rss"></i></a></li><li><a href="http://weibo.com/1953548815"><i class="fa fa-weibo"></i></a></li><li><a href="http://github.com/pansy-cx"><i class="fa fa-github"></i></a></li></ul><div class="footer"><a target="_blank" href="/"><span>Theme by </span></a><a href="https://www.caicai.me"> CaiCai </a><span>&</span><a href="https://github.com/Ben02/hexo-theme-Anatole"> Ben</a><div class="by_farbox"><a href="https://hexo.io/zh-cn/" target="_blank">Proudly published with Hexo&#65281;</a></div></div></div><div class="main"><div class="page-top animated fadeInDown"><div class="nav"><li><a href="/">首页</a></li><li><a href="/about">关于</a></li><li><a href="/archives">归档</a></li></div><div class="information"><div class="back_btn"><li><a class="fa fa-chevron-left" onclick="window.history.go(-1)"> </a></li></div><div class="avatar"><img src="/images/favicon.png"></div></div></div><div class="autopagerize_page_element"><div class="content"><div class="post-page"><div class="post animated fadeInDown"><div class="post-title"><h3><a>微信开发过程常见问题总结</a></h3></div><div class="post-content"><h4 id="Q：小程序鉴权机制？"><a href="#Q：小程序鉴权机制？" class="headerlink" title="Q：小程序鉴权机制？"></a>Q：小程序鉴权机制？</h4><ol>
+<li><p><code>wx.getSetting</code> 获取当前用户授权状态。</p>
+</li>
+<li><p><code>wx.authorize</code> 提前向用户获取授权权限。</p>
+</li>
+<li><p><code>wx.login</code> 获取登陆信息（<code>code</code>），后台通过 <code>code</code> 请求微信登陆凭证校验接口，拿到 <code>openId</code> 和 <code>sessionkey</code>(用于校验)。</p>
+</li>
+<li><p><code>wx.getUserInfo</code> 获取用户信息</p>
+<ul>
+<li><p>此接口必须在用户同意登陆授权后才可使用（调用 <code>wx.getSetting</code> 和 <code>wx.authorize</code>），否则会直接进入 fail 回调。</p>
+</li>
+<li><p>参数 withCredentials 为 true 时，要求此前有登陆过（调用过 <code>wx.login</code>，且登陆态未过期），此时返回由 <code>encryptedData</code> 和 <code>iv</code> 等敏感信息，解密后能拿到 <code>unionId</code> 等。</p>
+</li>
+<li><p>接口调用必须让用户手动点击登陆按钮</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">button</span></span></span><br><span class="line"><span class="tag">  <span class="attr">wx:if</span>=<span class="string">"&#123;&#123;canIUse&#125;&#125;"</span></span></span><br><span class="line"><span class="tag">  <span class="attr">open-type</span>=<span class="string">"getUserInfo"</span></span></span><br><span class="line"><span class="tag">  <span class="attr">bindgetuserinfo</span>=<span class="string">"bindGetUserInfo"</span></span></span><br><span class="line"><span class="tag">&gt;</span></span><br><span class="line">  授权登录</span><br><span class="line"><span class="tag">&lt;/<span class="name">button</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">button</span> <span class="attr">wx:else</span>&gt;</span></span><br><span class="line">  升级微信版本 &amp;&amp; 使用旧接口</span><br><span class="line"><span class="tag">&lt;/<span class="name">button</span>&gt;</span></span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+</li>
+</ol>
+<h4 id="Q：微信开发各种-Id-区别？"><a href="#Q：微信开发各种-Id-区别？" class="headerlink" title="Q：微信开发各种 Id 区别？"></a>Q：微信开发各种 Id 区别？</h4><ol>
+<li><p>appId： 开发者账号信息，一个 Appid 对应一个公众号 or 小程序。</p>
+</li>
+<li><p>openId：不同用户在不同小程序下都有一个唯一的 openId。</p>
+</li>
+<li><p>unionId：同一个用户在企业绑定的公众号和小程序上是 unionId 是一致的。</p>
+<p>unionId 获取方式（摘自微信公众平台）：</p>
+<blockquote>
+<ol>
+<li>调用接口<a href="https://developers.weixin.qq.com/miniprogram/dev/api/open.html" target="_blank" rel="noopener">wx.getUserInfo</a>，从解密数据中获取UnionID。注意本接口需要用户授权，请开发者妥善处理用户拒绝授权后的情况。</li>
+<li>如果开发者帐号下存在<strong>同主体的</strong>公众号，并且该用户已经关注了该公众号。开发者可以直接通过<a href="https://developers.weixin.qq.com/miniprogram/dev/api/api-login.html" target="_blank" rel="noopener">wx.login</a>获取到该用户UnionID，无须用户再次授权。</li>
+<li>如果开发者帐号下存在<strong>同主体的</strong>公众号或移动应用，并且该用户已经授权登录过该公众号或移动应用。开发者也可以直接通过<a href="https://developers.weixin.qq.com/miniprogram/dev/api/api-login.html" target="_blank" rel="noopener">wx.login</a>获取到该用户UnionID，无须用户再次授权。</li>
+</ol>
+</blockquote>
+</li>
+</ol>
+<h4 id="Q：微信授权登陆（OAuth2-0）"><a href="#Q：微信授权登陆（OAuth2-0）" class="headerlink" title="Q：微信授权登陆（OAuth2.0）"></a>Q：微信授权登陆（OAuth2.0）</h4><p>⚠️获取授权用户基本信息的条件是「服务号」，「订阅号」是无法拿到微信用户信息。在获取用户授权时会返回错误码 10005。</p>
+<ol>
+<li><p>用户同意授权，获取 code</p>
+<p>打开此链接</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">https://open.weixin.qq.com/connect/oauth2/authorize?appid=APPID&amp;redirect_uri=REDIRECT_URI&amp;response_type=code&amp;scope=SCOPE&amp;state=STATE#wechat_redirect</span><br></pre></td></tr></table></figure>
+<ul>
+<li>APPID：应用ID。</li>
+<li>REDIRECT_URI：授权后重定向URL，会带上授权 code，注意需要使用 <code>UrlEncode</code>编码。</li>
+<li>SCOPE：授权作用域，<ul>
+<li><code>snsapi_base</code>：不弹出授权页面，直接跳转，只能获取用户 <code>openid</code></li>
+<li><code>snsapi_userinfo</code>：弹出授权页，可通过 <code>openid</code> 拿到昵称、性别、所在地以及 <code>unionId</code> </li>
+</ul>
+</li>
+<li>STATE: 重定向参数</li>
+</ul>
+</li>
+<li><p>通过 <code>code</code> 换取 <code>access_token</code>，此步骤必须在服务端进行，返回 <code>access_token</code>。</p>
+</li>
+<li><p>如果是 <code>snsapi_userinfo</code> ，可以根据 <code>access_token</code> 和 <code>openId</code> 获取用户信息， <code>unionId</code>以及用户昵称地址等信息。</p>
+</li>
+</ol>
+</div><div class="post-footer"><div class="meta"><div class="info"><i class="fa fa-sun-o"></i><span class="date">2019-03-09</span><i class="fa fa-tag"></i><a class="tag" href="/tags/JavaScript/" title="JavaScript">JavaScript </a><a class="tag" href="/tags/微信/" title="微信">微信 </a></div></div></div></div><div class="share"><div class="evernote"><a class="fa fa-bookmark" href="javascript:(function(){EN_CLIP_HOST='http://www.evernote.com';try{var%20x=document.createElement('SCRIPT');x.type='text/javascript';x.src=EN_CLIP_HOST+'/public/bookmarkClipper.js?'+(new%20Date().getTime()/100000);document.getElementsByTagName('head')[0].appendChild(x);}catch(e){location.href=EN_CLIP_HOST+'/clip.action?url='+encodeURIComponent(location.href)+'&amp;title='+encodeURIComponent(document.title);}})();" ref="nofollow" target="_blank"></a></div><div class="weibo"><a class="fa fa-weibo" href="javascript:void((function(s,d,e){try{}catch(e){}var f='http://service.weibo.com/share/share.php?',u=d.location.href,p=['url=',e(u),'&amp;title=',e(d.title),'&amp;appkey=2924220432'].join('');function a(){if(!window.open([f,p].join(''),'mb',['toolbar=0,status=0,resizable=1,width=620,height=450,left=',(s.width-620)/2,',top=',(s.height-450)/2].join('')))u.href=[f,p].join('');};if(/Firefox/.test(navigator.userAgent)){setTimeout(a,0)}else{a()}})(screen,document,encodeURIComponent));"></a></div><div class="twitter"><a class="fa fa-twitter" href="http://twitter.com/home?status=,http://idmrchan.com/2019/03/09/wechat-custom-qa/,Virgil Chan,微信开发过程常见问题总结,;"></a></div></div><div class="pagination"><ul class="clearfix"><li class="next pagbuttons"><a class="btn" role="navigation" href="/2019/02/13/ios-wkwebview-cookie/" title="iOS 浏览器和 WKWebView 跨域 Cookie 的问题">下一篇</a></li></ul></div></div></div></div></div><script src="/js/jquery.js"></script><script src="/js/jquery-migrate-1.2.1.min.js"></script><script src="/js/jquery.appear.js"></script></body></html>
