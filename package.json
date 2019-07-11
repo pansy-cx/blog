@@ -3,12 +3,12 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-  	"build": "hexo g",
-  	"release": "hexo d",
+    "build": "hexo g",
+    "release": "hexo d",
     "clean": "hexo clean"
   },
   "hexo": {
-    "version": "3.7.1"
+    "version": "3.9.0"
   },
   "dependencies": {
     "hexo": "^3.2.0",
