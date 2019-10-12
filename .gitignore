@@ -7,4 +7,6 @@ yarn-error.log*
 
 # Dependency directories
 node_modules/
-.DS_Store/
+.DS_Store
+*/.DS_Store
+.gitignore.swp
