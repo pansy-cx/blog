@@ -1,10 +1,10 @@
 ---
 layout:     post
 title:      "一：ReactNative 源码笔记 - 原理"
-date:       2019-07-11 23:33:00
+date:       2019-10-12 16:14:00
 tags:
     - iOS
-	- React-Native
+    - React-Native
 ---
 
 之前在研究 RN -> Web 的时候，发现我对 RN 的理解还不够清晰，所以拿源码翻了一下，记录一下心得。

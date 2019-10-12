@@ -3,9 +3,9 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "build": "hexo g",
-    "release": "hexo d",
-    "clean": "hexo clean"
+    "build": "npx hexo g",
+    "release": "npx hexo d",
+    "clean": "npx hexo clean"
   },
   "hexo": {
     "version": "3.9.0"
