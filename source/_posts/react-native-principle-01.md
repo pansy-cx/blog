@@ -1,6 +1,6 @@
 ---
 layout:     post
-title:      "一：ReactNative 源码笔记 - 原理"
+title:      "ReactNative 运行原理"
 date:       2019-10-12 16:14:00
 tags:
     - iOS
@@ -260,11 +260,6 @@ void JSIExecutor::loadApplicationScript(
 
 
 
-### Doing
+### RN 系列文章
 
-- Native 与 RN 通信
-
-### TODO
-
-- JSI，大概率看不懂
-- JS Bundle，以后项目优化可能需要用到 RAM，提前看看
+- [Native 与 RN 通信](https://idmrchan.com/2019/10/14/react-native-principle-02/)
