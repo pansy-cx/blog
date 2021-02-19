@@ -1,0 +1,218 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="X-UA-Compatible" content="IE=edge"><meta name="author" content="Virigl,mrchan3668@gmail.com"><title>HLS 协议详解 · Virgil Chan</title><meta name="description" content="工作原理
+WIKI 解释：
+HTTP Live Streaming，缩写为HLS，是由苹果公司提出基于HTTP的流媒体网络传输协议。是苹果公司QuickTime X和iPhone软件系统的一部分。它的工作原理是把整个流分成一个个小的基于HTTP的文件来下载，每次只下载一些。当媒体流正在播放时，客户端"><meta name="keywords" content="HTML,CSS,JavaScript,Vue,AngularJS,WebPack,UnderScore,System,Raspberry,Tool,Linux,WordPress,NodeJS,MongoDB,Git,Python"><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport"><meta content="yes" name="apple-mobile-web-app-capable"><meta content="black" name="apple-mobile-web-app-status-bar-style"><meta content="telephone=no" name="format-detection"><meta name="renderer" content="webkit"><link rel="short icon" href="/images/favicon.png" type="image/x-icon"><link rel="stylesheet" href="/css/style.css"><link rel="stylesheet" href="/css/blog_basic.css"><link rel="stylesheet" href="/css/font-awesome.min.css"><link rel="alternate" type="application/atom+xml" title="ATOM 1.0" href="/atom.xml"><link rel="manifest" href="/manifest.json"></head><body><div class="sidebar animated fadeInDown"><div class="logo-title"><div class="title"><img src="/images/favicon.png" style="width:127px;"><h3 title=""><a href="/">Virgil Chan</a></h3><div class="description"><p>间歇性凌云壮志，持续性混吃等死</p></div></div></div><ul class="social-links"><li><a href="http://www.feed43.com/6708067855351261.xml"><i class="fa fa-rss"></i></a></li><li><a href="http://weibo.com/1953548815"><i class="fa fa-weibo"></i></a></li><li><a href="http://github.com/pansy-cx"><i class="fa fa-github"></i></a></li></ul><div class="footer"><a target="_blank" href="/"><span>Theme by </span></a><a href="https://www.caicai.me"> CaiCai </a><span>&</span><a href="https://github.com/Ben02/hexo-theme-Anatole"> Ben</a><div class="by_farbox"><a href="https://hexo.io/zh-cn/" target="_blank">Proudly published with Hexo&#65281;</a></div></div></div><div class="main"><div class="page-top animated fadeInDown"><div class="nav"><li><a href="/">首页</a></li><li><a href="/about">关于</a></li><li><a href="/archives">归档</a></li></div><div class="information"><div class="back_btn"><li><a class="fa fa-chevron-left" onclick="window.history.go(-1)"> </a></li></div><div class="avatar"><img src="/images/favicon.png"></div></div></div><div class="autopagerize_page_element"><div class="content"><div class="post-page"><div class="post animated fadeInDown"><div class="post-title"><h3><a>HLS 协议详解</a></h3></div><div class="post-content"><h3 id="工作原理"><a href="#工作原理" class="headerlink" title="工作原理"></a>工作原理</h3><blockquote>
+<p>WIKI 解释：</p>
+<p><strong>HTTP Live Streaming</strong>，缩写为<strong>HLS</strong>，是由<a href="https://zh.wikipedia.org/wiki/苹果公司" target="_blank" rel="noopener">苹果公司</a>提出基于<a href="https://zh.wikipedia.org/wiki/HTTP" target="_blank" rel="noopener">HTTP</a>的<a href="https://zh.wikipedia.org/wiki/流媒体" target="_blank" rel="noopener">流媒体</a><a href="https://zh.wikipedia.org/wiki/网络传输协议" target="_blank" rel="noopener">网络传输协议</a>。是苹果公司<a href="https://zh.wikipedia.org/w/index.php?title=QuickTime_X&amp;action=edit&amp;redlink=1" target="_blank" rel="noopener">QuickTime X</a>和<a href="https://zh.wikipedia.org/wiki/IPhone" target="_blank" rel="noopener">iPhone</a>软件系统的一部分。它的工作原理是把整个流分成一个个小的基于HTTP的文件来下载，每次只下载一些。当媒体流正在播放时，客户端可以选择从许多不同的备用源中以不同的速率下载同样的资源，允许流媒体会话适应不同的数据速率。在开始一个流媒体会话时，客户端会下载一个包含元数据的<a href="https://zh.wikipedia.org/wiki/M3U" target="_blank" rel="noopener">扩展 M3U (m3u8)</a> 播放列表文件，用于寻找可用的媒体流。</p>
+</blockquote>
+<p>简单来说，就是将视频切成一个个的 ts(transport stream) 片段，由 m3u8 文件格式记录其信息。首先下载视频的 m3u8 播放列表，在根据时间下载对应的 ts 片段播放。</p>
+<h3 id="播放列表-m3u8"><a href="#播放列表-m3u8" class="headerlink" title="播放列表(m3u8)"></a>播放列表(m3u8)</h3><p>纯文本格式，分别有两种类型：</p>
+<h5 id="Master-Playlist"><a href="#Master-Playlist" class="headerlink" title="Master Playlist"></a>Master Playlist</h5><figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#EXTM3U</span></span><br><span class="line"><span class="comment">#EXT-X-STREAM-INF:BANDWIDTH=150000,RESOLUTION=416x234,CODECS="avc1.42e00a,mp4a.40.2"</span></span><br><span class="line">http://example.com/low/index.m3u8</span><br><span class="line"><span class="comment">#EXT-X-STREAM-INF:BANDWIDTH=240000,RESOLUTION=416x234,CODECS="avc1.42e00a,mp4a.40.2"</span></span><br><span class="line">http://example.com/lo_mid/index.m3u8</span><br><span class="line"><span class="comment">#EXT-X-STREAM-INF:BANDWIDTH=440000,RESOLUTION=416x234,CODECS="avc1.42e00a,mp4a.40.2"</span></span><br><span class="line">http://example.com/hi_mid/index.m3u8</span><br><span class="line"><span class="comment">#EXT-X-STREAM-INF:BANDWIDTH=640000,RESOLUTION=640x360,CODECS="avc1.42e00a,mp4a.40.2"</span></span><br><span class="line">http://example.com/high/index.m3u8</span><br><span class="line"><span class="comment">#EXT-X-STREAM-INF:BANDWIDTH=64000,CODECS="mp4a.40.5"</span></span><br><span class="line">http://example.com/audio/index.m3u8</span><br></pre></td></tr></table></figure>
+<ul>
+<li><p>EXTM3U：标记开头。</p>
+</li>
+<li><p>EXT-X-STREAM-INF：标记每一个 URL 的属性，一般展示不同清晰度的信息。其中 BANDWIDTH 是必填的，Int 类型，表示每个媒体文件的总体比特率的上限。</p>
+</li>
+</ul>
+<h5 id="Playlist-Construction"><a href="#Playlist-Construction" class="headerlink" title="Playlist Construction"></a>Playlist Construction</h5><p>一个<strong>点播</strong>形式的 m3u8 播放列表格式如下：</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#EXTM3U</span></span><br><span class="line"><span class="comment">#EXT-X-PLAYLIST-TYPE:VOD</span></span><br><span class="line"><span class="comment">#EXT-X-TARGETDURATION:10</span></span><br><span class="line"><span class="comment">#EXT-X-VERSION:4</span></span><br><span class="line"><span class="comment">#EXT-X-MEDIA-SEQUENCE:0</span></span><br><span class="line"><span class="comment">#EXTINF:10.0,</span></span><br><span class="line">http://example.com/movie1/fileSequenceA.ts</span><br><span class="line"><span class="comment">#EXTINF:10.0,</span></span><br><span class="line">http://example.com/movie1/fileSequenceB.ts</span><br><span class="line"><span class="comment">#EXTINF:10.0,</span></span><br><span class="line">http://example.com/movie1/fileSequenceC.ts</span><br><span class="line"><span class="comment">#EXTINF:9.0,</span></span><br><span class="line">http://example.com/movie1/fileSequenceD.ts</span><br><span class="line"><span class="comment">#EXT-X-ENDLIST</span></span><br></pre></td></tr></table></figure>
+<ul>
+<li>EXTM3U：标记开头。</li>
+<li>EXT-X-PLAYLIST-TYPE：VCD，表示信息流不能修改。</li>
+<li>EXT-X-TARGETDURATION：单个媒体文件持续的最大时间，单位秒。</li>
+<li>EXT-X-VERSION：协议版本。</li>
+<li>EXT-X-MEDIA-SEQUENCE：标记当前视频从哪个片段开始播放。</li>
+<li>EXTINF：记录每一段媒体文件的持续时间。</li>
+<li>EXT-X-ENDLIST：标记结尾。</li>
+</ul>
+<p>根据参数的配置不同，又分为以下三种模式：</p>
+<ol>
+<li><p>点播： <code>#EXT-X-PLAYLIST-TYPE: VOD</code> 表示信息流不允许修改，结尾包含 <code>#EXT-X-ENDLIST</code>。</p>
+<blockquote>
+<p>VOD: Video on Demand</p>
+</blockquote>
+</li>
+<li><p>实时转播：类似于赛事直播，和普通直播的区别是可以看之前的内容， <code>#EXT-X-PLAYLIST-TYPE: EVENT</code>表示信息流不允许修改，只允许新增，结尾没有 <code>#EXT-X-ENDLIST</code> 字段，表示正在直播，结束后自动添加。</p>
+</li>
+<li><p>直播：没有 <code>#EXT-X-PLAYLIST-TYPE</code>，每播一个文件 <code>#EXT-X-MEDIA-SEQUENCE</code> 必须加一。</p>
+</li>
+</ol>
+<h3 id="传输流-MPEG2-TS"><a href="#传输流-MPEG2-TS" class="headerlink" title="传输流(MPEG2-TS)"></a>传输流(MPEG2-TS)</h3><blockquote>
+<p>Wiki 解释：</p>
+<p><strong>MPEG2-TS 传输流</strong>（MPEG-2 Transport Stream；又称MPEG-TS、MTS、TS）是一种标准数字封装格式,用来传输和存储视频、音频与频道、节目信息，应用于数字电视广播系统，如<a href="https://zh.wikipedia.org/wiki/DVB" target="_blank" rel="noopener">DVB</a>、<a href="https://zh.wikipedia.org/wiki/ATSC" target="_blank" rel="noopener">ATSC</a>、<a href="https://zh.wikipedia.org/wiki/ISDB" target="_blank" rel="noopener">ISDB</a><a href="https://zh.wikipedia.org/wiki/MPEG2-TS#cite_note-川口-3" target="_blank" rel="noopener">[3]</a>:118、<a href="https://zh.wikipedia.org/wiki/IPTV" target="_blank" rel="noopener">IPTV</a>等。</p>
+</blockquote>
+<p>TS分组（TS Packet）大小最大为 188 字节，它是多路复用的基本单位。多个不同的 ES 的内容会分别被封装到TSP 中通过同一个TS传输</p>
+<blockquote>
+<p>ES：(Elementary Stream) 基本码流，不分段的音频、视频或其他信息的连续码流。</p>
+</blockquote>
+<h5 id="TS-分组格式"><a href="#TS-分组格式" class="headerlink" title="TS 分组格式"></a>TS 分组格式</h5><p><img src="https://tva1.sinaimg.cn/large/008eGmZEly1gnp4pj3resj30tg0jjtbu.jpg" alt="ts-format"></p>
+<ul>
+<li><p>payload：具体的音视频信息。</p>
+<blockquote>
+<p>TS 包中 Payload 所传输的信息包括两种类型：视频、音频的 PES 包以及辅助数据；节目专用信息 PSI。</p>
+<p>PES：分组后的 ES。</p>
+<p>PSI：(Program Specific Information) 节目专用信息，用来表示这个 TS 包包含哪些信息。</p>
+</blockquote>
+</li>
+<li><p>sync byte：表示一个 TS 片段的开始，固定 0x47。</p>
+</li>
+<li><p>transport error indicator：发送时（调制前）值为 0。接收方的解调器在无法成功解调 TS 分组内容时，将该位设置为 1，表示该 TS 分组损坏。</p>
+</li>
+<li><p>payload unit start indicator：负载单元起始标示符，一个完整的数据包开始时标记为1, 表示携带的是PSI或PES第一个包。</p>
+</li>
+<li><p>transport priority：值为1时，在相同PID的分组中具有更高的优先权。</p>
+</li>
+<li><p>PID：用于识别TS分组的ID。</p>
+</li>
+<li><p>transport scrambing control：值为 ‘00’ 时表示载荷未加密。其余值由具体系统定义。</p>
+</li>
+<li><p>adaptation field control：适配域标志符，第一位表示适配域是否存在，第二位表示 payload 是否存在。</p>
+</li>
+<li><p>continuity counter：连续计数器，每当一个 TS 分组中包含 payload 时，该计数器加 1。</p>
+</li>
+<li><p>adaptation field：为了传送打包后长度不足188B（包括包头）的不完整TS，或者为了在系统层插入节目时钟参考 PCR 字段，需要在TS 包中插入可变长度字段的调整字段。</p>
+<p><img src="https://tva1.sinaimg.cn/large/008eGmZEly1gnp56nqm5nj30rv07umya.jpg" alt="ts-adaptation-field"></p>
+</li>
+</ul>
+<p>光看以上信息还是不够清晰，举个例子，取 <a href="https://bitdash-a.akamaihd.net/content/sintel/hls/playlist.m3u8" target="_blank" rel="noopener">https://bitdash-a.akamaihd.net/content/sintel/hls/playlist.m3u8</a> 的第一个 TS Packet：</p>
+<p><img src="https://tva1.sinaimg.cn/large/008eGmZEly1gnp4q84asxj30uk0u0kjm.jpg" alt="image-20210210200746001" style="zoom: 70%;"></p>
+<p>其中固定部分是前四个字节 0x47400011</p>
+<ul>
+<li>0x47：表示一个 TS Packet 开始。</li>
+<li>0x4000：0100 0000 0000 0000(B)<ul>
+<li>0，传输错误指示位，表示正常。</li>
+<li>1，载荷单元开始指示位，表示携带的是包头。</li>
+<li>0，传输优先级。</li>
+<li>0 0000 0000 0000(B)，PID = 0x0000。</li>
+</ul>
+</li>
+<li>0x11：0001 0001(B)<ul>
+<li>00，表示未加密。</li>
+<li>01，没有 adaptation field。</li>
+<li>0001，连续计数器。</li>
+</ul>
+</li>
+<li>剩余部分，payload。</li>
+</ul>
+<p>刚才我们说到 payload 包括两种类型，分组后的 ES 数据（PES）或节目关联表（PSI），其中 PSI 又分为以下四种表：</p>
+<ul>
+<li>PAT：(Program Association Table) 节目关联表，列出该 TS 内所有节目，PID 固定为 0x0000。提供传输流中包含哪些节目、节目的编号以及对应节目的 PMT ID，以及 NIT 信息。</li>
+<li>PMT：(Program Map Table) 节目映射表，表示该节目由那些流组成，这些流的类型（音频、视频、数据），以及组成该节目的流的位置，对应 TS 包的 PID 值，每路节目的节目时钟参考（PCR）字段的位置等。</li>
+<li>CAT：(Conditional Access Table) 用于节目的加密与解密。PID 固定为 0x0001。</li>
+<li>NIT：(Network Information Table) 网络信息表，提供 TS 的相关信息，如频率、调制方式，包含多少 TS 流等。</li>
+</ul>
+<h5 id="PAT-分组格式"><a href="#PAT-分组格式" class="headerlink" title="PAT 分组格式"></a>PAT 分组格式</h5><p><img src="https://tva1.sinaimg.cn/large/008eGmZEly1gnp64fylvqj30ur0jjn0c.jpg" alt="ts-pat-format"></p>
+<ul>
+<li><p>table id：PID，PAT 固定为 0x00。</p>
+</li>
+<li><p>section syntax indicator：固定为1。</p>
+<blockquote>
+<p>WiKi: A flag that indicates if the syntax section follows the section length. The PAT, PMT, and CAT all set this to 1</p>
+</blockquote>
+</li>
+<li><p>0：固定值。</p>
+<blockquote>
+<p>WiKi: The PAT, PMT, and CAT all set this to 0. Other tables set this to 1.</p>
+</blockquote>
+</li>
+<li><p>reserved：保留字段，固定为 11。</p>
+</li>
+<li>section length：12bit，前2bit是保留位，后10位表示此字段之后的整个分段的字节数，包含 CRC 32。</li>
+<li>Transport stream id：用户自定义，用于在一个网络中从其他的多路复用中识别此传送流。</li>
+<li>reserved：保留字段，固定为11。</li>
+<li>version number：PAT 版本号，如果 PAT 改变，+1。</li>
+<li>current next indicator：为 1 时，当前PAT可用。</li>
+<li>section number：分段号，PAT 可能分多段传输，从 0x00 开始开始计数。</li>
+<li>last_section_number：最后一个分段号号数。</li>
+<li>N loop：循环获取 PMT 信息。<ul>
+<li>Program number：节目号，当为 0 时，接下来的 PID 为网络 PID。</li>
+<li>reserved：3位保留位，固定111。</li>
+<li>PID：13位 PID信息。</li>
+</ul>
+</li>
+<li>CRC 32：校验码</li>
+</ul>
+<p>继续分析上面的例子：</p>
+<blockquote>
+<p>00 00 B0 0D 00 01 C1 00 00 00 01 E1 00 E8 F9 5E 7D FF…</p>
+</blockquote>
+<p>刚才在分析 TS Header 的时候，payload_unit_start_indicator = 1，表示是否是数据包的起始位置。那么 PSI payload 的第一个 bytes 为 pointer_field，表示数据从哪里开始。</p>
+<ul>
+<li>0x00，说明数据从下一个字节开始。</li>
+<li>0x00，PAT 的 PID，固定为 0x00。</li>
+<li>0xB00D，1011 0000 0000 1101(B)<ul>
+<li>1011(B)，固定值和保留字段</li>
+<li>0000 0000 1011(B)，section length = 13，说明后续长度为 13 bytes</li>
+</ul>
+</li>
+<li>0x0001，stream id。</li>
+<li>0xC1，1100 0001(B)<ul>
+<li>11，保留字段。</li>
+<li>00000，版本号。</li>
+<li>1，当前 PAT 可用。</li>
+</ul>
+</li>
+<li>0x0000，当前分段号0，最后一个分段号也为0，表示只有一个 PAT Packet。</li>
+<li>0x0001E100，循环信息<ul>
+<li>0x0001，program number 为 1，表示这是 PMT 信息。</li>
+<li>0xE100，1110 0001 0000 0000(B)<ul>
+<li>111(B)，三位保留位，固定部分。</li>
+<li>0 0001 0000 0000(B)，PMT ID = 256。</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>0xE8F95E7D，CRC 信息</li>
+</ul>
+<h5 id="PMT-信息格式"><a href="#PMT-信息格式" class="headerlink" title="PMT 信息格式"></a>PMT 信息格式</h5><p><img src="https://tva1.sinaimg.cn/large/008eGmZEly1gnrghudgl2j30ug0p4n0y.jpg" alt="ts-pmt-format"></p>
+<p>结合第二个 TS Packet 分析</p>
+<p><img src="https://tva1.sinaimg.cn/large/008eGmZEly1gnrgvthxqcj30uk0u0hdu.jpg" alt="image-20210218101441077" style="zoom:70%;"></p>
+<p>0x4100，其中 PID 是后 13 位 001 0000 0000(B) = 256，和 PAT 中拿到的 PMT ID 信息是一致的，说明第二个 Packet 包含了 PMT 信息。PMT 信息片段如下：</p>
+<blockquote>
+<p>02 B0 12 00 01 C1 00 00 E1 02 F0 00 1B E1 02 F0 00 A1 4F AD CC</p>
+</blockquote>
+<ul>
+<li>0x02：table id，固定值。</li>
+<li>0xB012：和 PAT 一样，包含几个固定值和 section length 长度，不再赘述。</li>
+<li>0x0001：program number，表示这是 PMT。</li>
+<li>0xC10000：和 PAT 一样，包含 version number, section number 等信息，不再赘述。</li>
+<li>0xE102：1110 0001 0000 0010(B)，前三位是固定值，后13位为 PCR PID = 258。</li>
+<li>0xF000：1111 0000 0000 0000(B)，program info length = 0，说明后面没有描述信息，开始循环</li>
+<li>0x1BE102F000：<ul>
+<li>0x1B：stream type 是 AVC(H264)。</li>
+<li>0xE102：1110 0001 0000 0010(B)，前三位保留位，后 13 位表示该流的 ID = 258。</li>
+<li>0xF000：前四位保留位，后 12 位表示该流的描述信息占多少字段，为 0。</li>
+</ul>
+</li>
+<li>0xA14FADCC：CRC32。</li>
+</ul>
+<h5 id="PES-信息格式"><a href="#PES-信息格式" class="headerlink" title="PES 信息格式"></a>PES 信息格式</h5><p><img src="https://tva1.sinaimg.cn/large/008eGmZEly1gnrjbo5snwj30tu0u9ag7.jpg" alt="ts-pes-format"></p>
+<p>结合第三个 TS Packet 分析</p>
+<p><img src="https://tva1.sinaimg.cn/large/008eGmZEly1gnsm590jxgj30uk0u07wh.jpg" alt="image-20210219100211030" style="zoom:70%;"></p>
+<p>其中 0x4102，说明 PID 是 258，和上面分析的 PMT 的 stream ID 一致。0x30 转为二进制 0011 0000(B)，11(B) 说明即有适配域又有载荷，需要先确定适配域范围。紧跟着后 8 位是 0x07，说明适配域长度是 7 位，跳过适配域（适配域包含了PCR信息，时间是 0，说明是视频刚开始那帧）</p>
+<blockquote>
+<p>00 00 01 E0 00 00 84 C0 0A 31 00 01 3A 99 11 00 … FF ….</p>
+</blockquote>
+<ul>
+<li><p>0x000001：packet start，固定是 0x000001。</p>
+</li>
+<li><p>0xE0：1110 0000(B)，stream id，说明是视频流。音频取值(0xc0-0xdf)；视频取值(0xe0-0xef)。</p>
+</li>
+<li><p>0x0000：包长度，0 表示不限长度。</p>
+</li>
+<li><p>0x84：包含数据是否加密、优先级、版权等信息。</p>
+</li>
+<li><p>0xC0：1100 0000(B)，表示有 PTS 和 DTS。</p>
+<blockquote>
+<p> pts是显示时间戳、dts是解码时间戳，视频数据两种时间戳都需要，音频数据的pts和dts相同，所以只需要pts</p>
+</blockquote>
+</li>
+<li><p>0x0A：header 剩余长度(bytes)，通常是 5 或 10，PTS 和 DTS 都有就是 10。</p>
+</li>
+<li>0xFF：填充字节，表示 PES header 结束</li>
+<li>ES 数据</li>
+</ul>
+<h3 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h3><p><a href="https://zh.wikipedia.org/wiki/HTTP_Live_Streaming" target="_blank" rel="noopener">Wiki: HTTP Live Streaming</a></p>
+<p><a href="https://developer.apple.com/documentation/http_live_streaming" target="_blank" rel="noopener">Apple: Live Streaming</a></p>
+<p><a href="https://zh.wikipedia.org/wiki/MPEG2-TS" target="_blank" rel="noopener">WIKI: MPEG2-TS</a></p>
+<p><a href="https://en.wikipedia.org/wiki/Program-specific_information" target="_blank" rel="noopener">Wiki: PSI</a></p>
+</div><div class="post-footer"><div class="meta"><div class="info"><i class="fa fa-sun-o"></i><span class="date">2017-03-24</span><i class="fa fa-tag"></i><a class="tag" href="/tags/HLS/" title="HLS">HLS </a></div></div></div></div><div class="share"><div class="evernote"><a class="fa fa-bookmark" href="javascript:(function(){EN_CLIP_HOST='http://www.evernote.com';try{var%20x=document.createElement('SCRIPT');x.type='text/javascript';x.src=EN_CLIP_HOST+'/public/bookmarkClipper.js?'+(new%20Date().getTime()/100000);document.getElementsByTagName('head')[0].appendChild(x);}catch(e){location.href=EN_CLIP_HOST+'/clip.action?url='+encodeURIComponent(location.href)+'&amp;title='+encodeURIComponent(document.title);}})();" ref="nofollow" target="_blank"></a></div><div class="weibo"><a class="fa fa-weibo" href="javascript:void((function(s,d,e){try{}catch(e){}var f='http://service.weibo.com/share/share.php?',u=d.location.href,p=['url=',e(u),'&amp;title=',e(d.title),'&amp;appkey=2924220432'].join('');function a(){if(!window.open([f,p].join(''),'mb',['toolbar=0,status=0,resizable=1,width=620,height=450,left=',(s.width-620)/2,',top=',(s.height-450)/2].join('')))u.href=[f,p].join('');};if(/Firefox/.test(navigator.userAgent)){setTimeout(a,0)}else{a()}})(screen,document,encodeURIComponent));"></a></div><div class="twitter"><a class="fa fa-twitter" href="http://twitter.com/home?status=,http://idmrchan.com/2017/03/24/hls-protocol-analysis/,Virgil Chan,HLS 协议详解,;"></a></div></div><div class="pagination"><ul class="clearfix"><li class="pre pagbuttons"><a class="btn" role="navigation" href="/2017/03/24/github-notepad/" title="Github 笔记">上一篇</a></li><li class="next pagbuttons"><a class="btn" role="navigation" href="/2017/03/20/mongodb-js-zz/" title="使用 JS 控制 Mongodb Array 数组">下一篇</a></li></ul></div></div></div></div></div><script src="/js/jquery.js"></script><script src="/js/jquery-migrate-1.2.1.min.js"></script><script src="/js/jquery.appear.js"></script></body></html>
