@@ -18,3 +18,4 @@ date: 2018-05-09 12:17:12
 ### JOB
 
 - 微众银行 / 前端开发工程师
+- Shopee / Senior Engineer
